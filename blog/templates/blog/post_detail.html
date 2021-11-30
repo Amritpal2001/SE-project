@@ -1,0 +1,321 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+    <div class="media-body">
+        <div class="article-metadata">
+            <a class="mr-2" href="{% url 'user-posts' post.author.username  %}">{{ post.author }}</a>
+            <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+
+            {% if post.author == user %}
+            <div>
+                <a class='btn btn-secondary btn-sm mt-1 mb-1' href=" {% url 'post-update' post.id %} ">Update</a>
+                <a class='btn btn-danger btn-sm mt-1 mb-1' href=" {% url 'post-delete' post.id %} ">Delete</a>
+            </div>
+            {% endif %}
+        </div>
+        <h2 class="article-title">{{ post.title }}</h2>
+        <p class="article-content">{{ post.content }}</p>
+    </div>
+</article>
+
+
+
+{% if rating %}
+<h2>Your Rating</h2>
+<div class="rcontainer">
+    <div class="star-widget">
+        <input type="radio" name="rrate" id="rrate-5">
+        <label for="rrate-5" class="fas fa-star" checked></label>
+        <input type="radio" name="rrate" id="rrate-4">
+        <label for="rrate-4" class="fas fa-star"></label>
+        <input type="radio" name="rrate" id="rrate-3">
+        <label for="rrate-3" class="fas fa-star"></label>
+        <input type="radio" name="rrate" id="rrate-2">
+        <label for="rrate-2" class="fas fa-star"></label>
+        <input type="radio" name="rrate" id="rrate-1">
+        <label for="rrate-1" class="fas fa-star"></label>
+    </div>
+</div>
+<script>
+    radiobtn = document.getElementById("rrate-{{ rating.rating }}");
+    radiobtn.checked = true;
+</script>
+<article class="media content-section">
+    <div>{{rating.review}}</div>
+</article>
+
+<h2>Edit your rating</h2>
+<article class="media content-section">
+    <div class="rcontainer">
+        <div class="post">
+            <div class="text">Thanks for rating us!</div>
+            <div class="edit">EDIT</div>
+        </div>
+        <div class="star-widget">
+            <input type="radio" name="rate" id="rate-5">
+            <label for="rate-5" class="fas fa-star" checked></label>
+            <input type="radio" name="rate" id="rate-4">
+            <label for="rate-4" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-3">
+            <label for="rate-3" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-2">
+            <label for="rate-2" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-1">
+            <label for="rate-1" class="fas fa-star"></label>
+
+            <form>
+                <div class="textarea">
+                    <textarea cols="30" placeholder="Describe your experience.."></textarea>
+                </div>
+                <div class="btn">
+                    <button class="rbutton" type="button">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</article>
+
+
+{% else %}
+
+<h2>Rate Article</h2>
+<article class="media content-section">
+    <div class="rcontainer">
+        <div class="post">
+            <div class="text">Thanks for rating us!</div>
+            <div class="edit">EDIT</div>
+        </div>
+        <div class="star-widget">
+            <input type="radio" name="rate" id="rate-5">
+            <label for="rate-5" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-4">
+            <label for="rate-4" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-3">
+            <label for="rate-3" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-2">
+            <label for="rate-2" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-1">
+            <label for="rate-1" class="fas fa-star"></label>
+
+            <form>
+                <div class="textarea">
+                    <textarea cols="30" placeholder="Describe your experience.."></textarea>
+                </div>
+                <div class="btn">
+                    <button class="rbutton" type="button">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</article>
+{% endif %}
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+    integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script>
+    
+    const post = document.querySelector(".post");
+    const widget = document.querySelector(".star-widget");
+    const editBtn = document.querySelector(".edit");
+
+    $('.rbutton').click(function () {
+
+        let stars = 0;
+        for (let i = 1; i <= 5; i++) {
+            input = "rate-" + i.toString();
+            if (document.getElementById(input).checked) {
+                console.log(i);
+                stars = i;
+                break;
+            }
+        }
+        let text = document.querySelector(".textarea textarea").value;
+        widget.style.display = "none";
+        post.style.display = "block";
+
+        editBtn.onclick = () => {
+            widget.style.display = "block";
+            post.style.display = "none";
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/addRating/",
+            data: {
+                post_id: '{{ post.id }}',
+                rating: stars,
+                review: text
+            },
+            success: function (data) {
+                if (data.success) {
+                    alert("Rating added!");
+                    location.reload();
+                }
+                else {
+                    alert("Some error occured")
+                }
+            }
+        })
+    })
+</script>
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
+    .rcontainer {
+        position: relative;
+        width: 100%;
+        /* background: #111; */
+        padding: 20px 30px;
+        /* border: 1px solid #444; */
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .rcontainer .post {
+        display: none;
+    }
+
+    .rcontainer .text {
+        font-size: 25px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .rcontainer .edit {
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        font-size: 16px;
+        /* color: #666; */
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .rcontainer .edit:hover {
+        text-decoration: underline;
+    }
+
+    .rcontainer .star-widget input {
+        display: none;
+    }
+
+    .star-widget label {
+        font-size: 40px;
+        /* color: #444; */
+        padding: 10px;
+        float: right;
+        transition: all 0.2s ease;
+    }
+
+    input:not(:checked)~label:hover,
+    input:not(:checked)~label:hover~label {
+        color: #fd4;
+    }
+
+    input:checked~label {
+        color: #fd4;
+    }
+
+    input#rate-5:checked~label {
+        color: #fe7;
+        text-shadow: 0 0 20px #952;
+    }
+
+    #rate-1:checked~form header:before {
+        content: "I just hate it ";
+    }
+
+    #rate-2:checked~form header:before {
+        content: "I don't like it ";
+    }
+
+    #rate-3:checked~form header:before {
+        content: "It is awesome ";
+    }
+
+    #rate-4:checked~form header:before {
+        content: "I just like it ";
+    }
+
+    #rate-5:checked~form header:before {
+        content: "I just love it ";
+    }
+
+    .rcontainer form {
+        display: none;
+    }
+
+    input:checked~form {
+        display: block;
+    }
+
+    form header {
+        width: 100%;
+        font-size: 25px;
+        color: #fe7;
+        font-weight: 500;
+        margin: 5px 0 20px 0;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    form .textarea {
+        height: 100px;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    form .textarea textarea {
+        height: 100%;
+        width: 100%;
+        outline: none;
+        color: #000;
+        border: 1px solid #333;
+        /* background: #222; */
+        padding: 10px;
+        font-size: 17px;
+        resize: none;
+    }
+
+    .textarea textarea:focus {
+        /* border-color: #444; */
+    }
+
+    form .btn {
+        height: 45px;
+        width: 100%;
+        margin: 15px 0;
+    }
+
+    form .btn button {
+        padding: 14px 37px;
+        width: 100%;
+        background-color: black;
+        border: 1px solid black;
+        color: white;
+        border-radius: 4px;
+        font-size: 17px;
+        font-weight: 500;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    form .btn button:hover {
+        background-color: white;
+        color: black;
+        transition-duration: 0.2s;
+    }
+</style>
+{% endblock content %}
