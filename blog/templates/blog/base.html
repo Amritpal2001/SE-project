@@ -56,19 +56,26 @@
             {% endif %}
             {% block content %}{% endblock %}
           </div>
+          {% if request.user.is_authenticated %}
           <div class="col-md-4">
             <div class="content-section">
-              <h3>Our Sidebar</h3>
-              <p class='text-muted'>You can put any information here you'd like.
-                <ul class="list-group">
-                  <li class="list-group-item list-group-item-light">Latest Posts</li>
-                  <li class="list-group-item list-group-item-light">Announcements</li>
-                  <li class="list-group-item list-group-item-light">Calendars</li>
-                  <li class="list-group-item list-group-item-light">etc</li>
-                </ul>
-              </p>
+              <h3>Recommended Blogs</h3>
+              {% for post in final_posts %}
+              <article class="media content-section">
+                  <div class="media-body">
+                  <div class="article-metadata">
+                      <a class="mr-2" href="{% url 'user-posts' post.author.username  %}">{{ post.author }}</a>
+                      <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+                  </div>
+                  <h2><a class="article-title" href=" {% url 'post-detail' post.id %} ">{{ post.title }}</a></h2>
+                  <p class="article-content">{{ post.content | truncatechars:200 }}</p>
+                  </div>
+                  
+              </article>
+          {% endfor %}
             </div>
           </div>
+          {% endif %}
         </div>
       </main>
   
